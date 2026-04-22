@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://safetide.app/sitemap.xml

@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SafeTide">
+<meta name="theme-color" content="#2c7a7b">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMmM3YTdiIi8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1mYW1pbHk9IkhlbHZldGljYSIgZm9udC1zaXplPSI5MCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UzwvdGV4dD48L3N2Zz4=">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzJjN2E3YiIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1mYW1pbHk9IkhlbHZldGljYSIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UzwvdGV4dD48L3N2Zz4=">
+<title>SafeTide</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --border: #e4e9ef;
+    --text: #1f2d3d;
+    --text-dim: #6b7a8f;
+    --accent: #2c7a7b;
+    --accent-soft: #e0f0f0;
+    --accent-score: #2c7a7b;
+    --accent-energy: #e97451;
+    --accent-sleep: #7c6df2;
+    --accent-danger: #d9534f;
+    --accent-success: #2f855a;
+    --accent-warn: #d69e2e;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+    max-width: 760px;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.5;
+  }
+  input, select, textarea, button { font-size: 16px; }
+  h1 { font-size: 28px; margin: 0 0 4px; color: #1a365d; }
+  h2 { font-size: 18px; margin: 0 0 12px; color: #1a365d; }
+  h3 { font-size: 16px; margin: 0 0 8px; color: #1a365d; }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin: 0 0 16px; }
+
+  /* Reminder banner */
+  .reminder-banner {
+    background: linear-gradient(135deg, #fff4e0, #fef9f1);
+    border: 1px solid #f4d9a8;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .reminder-banner .close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 6px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: #e8edf3;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 9px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: all .15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    font-weight: 600;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a365d;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* Filters (time range) */
+  .filters {
+    display: flex;
+    gap: 4px;
+    background: #e8edf3;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .filter-btn {
+    flex: 1;
+    padding: 7px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: inherit;
+  }
+  .filter-btn.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    font-weight: 600;
+  }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    gap: 18px;
+    text-align: right;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* Chart */
+  canvas { width: 100% !important; height: 220px !important; }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .form-grid-full { grid-column: 1 / -1; }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-weight: 600;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(44,122,123,.1);
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  input[type="range"] {
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    accent-color: var(--accent);
+  }
+  .score-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .score-value {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #236160; }
+  .btn-secondary { background: #e8edf3; color: var(--text); }
+  .btn-secondary:hover { background: #d8dfe7; }
+  .btn-danger {
+    background: transparent;
+    color: var(--accent-danger);
+    border: 1px solid #f5c5c3;
+  }
+  .btn-danger:hover { background: #fef1f0; }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-row .btn { flex: 1; min-width: 120px; }
+
+  /* Suggestion */
+  .suggestion {
+    background: linear-gradient(135deg, #e0f0f0, #f3faf9);
+    border: 1px solid #b7d8d7;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 14px;
+  }
+  .suggestion h3 { color: var(--accent); margin-bottom: 6px; font-size: 14px; }
+  .suggestion p { margin: 0; font-size: 14px; }
+
+  /* Today's entries */
+  .today-entries {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .today-entry {
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+  }
+  .today-entry.empty { background: #f1f3f7; color: var(--text-dim); }
+  .today-entry .slot-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .today-entry .scores {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 700;
+  }
+  .today-entry .scores .s-score { color: var(--accent-score); }
+  .today-entry .scores .s-energy { color: var(--accent-energy); }
+  .today-entry .scores .s-sleep { color: var(--accent-sleep); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Trend arrows */
+  .trend-up { color: var(--accent-success); }
+  .trend-down { color: var(--accent-danger); }
+  .trend-flat { color: var(--text-dim); }
+
+  /* Journal */
+  .journal {
+    margin-top: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .journal-entry {
+    padding: 10px 12px;
+    border-left: 3px solid var(--accent);
+    background: #f7f9fb;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .journal-date {
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 4px;
+  }
+
+  /* Analysis */
+  .analysis-result { font-size: 14px; }
+  .analysis-result .insight {
+    padding: 10px 12px;
+    background: #f7f9fb;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  .analysis-result .insight strong {
+    color: var(--accent);
+    display: block;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .analysis-result .highlight {
+    background: #fef3cd;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .analysis-result ul { margin: 6px 0 0; padding-left: 20px; }
+  .analysis-result li { margin-bottom: 4px; }
+  .analysis-result p { margin: 0 0 4px; }
+
+  /* Entry list */
+  .entry-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    gap: 10px;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    align-items: center;
+  }
+  .entry-row:last-child { border-bottom: none; }
+  .entry-meta { color: var(--text-dim); font-size: 12px; }
+  .entry-scores { display: flex; gap: 6px; }
+  .entry-scores span {
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 28px;
+    text-align: center;
+  }
+  .entry-delete {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 14px;
+  }
+  .entry-delete:hover { color: var(--accent-danger); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--text-dim);
+  }
+  .empty-state h3 { color: var(--text); margin-bottom: 6px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2d3d;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity .2s ease;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Range inputs row */
+  .sliders-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    body { padding: 14px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .today-entries { grid-template-columns: 1fr; }
+    .stats { gap: 12px; }
+    canvas { height: 180px !important; }
+  }
+</style>
+</head>
+<body>
+  <h1>SafeTide</h1>
+  <p class="subtitle">Tracker local · tes données ne quittent pas ta machine</p>
+
+  <div class="reminder-banner" id="reminder-banner" style="display:none">
+    <div>⏰ Pense à logger ton état aujourd'hui — tu n'as encore rien noté.</div>
+    <button class="close" onclick="document.getElementById('reminder-banner').style.display='none'">×</button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="today">Aujourd'hui</button>
+    <button class="tab" data-tab="progress">Progression</button>
+    <button class="tab" data-tab="analysis">Analyse</button>
+    <button class="tab" data-tab="history">Historique</button>
+  </nav>
+
+  <!-- TAB: AUJOURD'HUI -->
+  <div class="tab-content active" id="tab-today">
+
+    <div class="card">
+      <h2>Ton état du jour</h2>
+      <div class="today-entries" id="today-summary"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Logger une entrée</h3>
+          <p class="card-subtitle">Matin, midi, soir — autant que tu veux</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label>Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div>
+          <label>Moment</label>
+          <select id="f-slot">
+            <option value="Morning">🌅 Matin</option>
+            <option value="Noon">☀️ Midi</option>
+            <option value="Evening">🌙 Soir</option>
+          </select>
+        </div>
+        <div class="form-grid-full">
+          <div class="score-label">
+            <label style="margin-bottom:0">Energy</label>
+            <span class="score-value" id="v-energy" style="color:var(--accent-energy)">6</span>
+          </div>
+          <input type="range" id="f-energy" min="0" max="10" step="0.5" value="6">
+        </div>
+        <div class="form-grid-full">
+          <div class="score-label">
+            <label style="margin-bottom:0">Sleep</label>
+            <span class="score-value" id="v-sleep" style="color:var(--accent-sleep)">6</span>
+          </div>
+          <input type="range" id="f-sleep" min="0" max="10" step="0.5" value="6">
+        </div>
+        <div class="form-grid-full">
+          <div class="score-label">
+            <label style="margin-bottom:0">Overall Score <span style="color:var(--text-dim);text-transform:none;letter-spacing:0;font-weight:400">· auto-calculé</span></label>
+            <span class="score-value" id="v-score" style="color:var(--accent-score)">6.0</span>
+          </div>
+        </div>
+        <div class="form-grid-full">
+          <label>Journal (optionnel)</label>
+          <textarea id="f-notes" placeholder="Ce que tu as envie de noter..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addEntry()">Enregistrer</button>
+        <button class="btn btn-secondary" onclick="resetForm()">Réinitialiser</button>
+      </div>
+    </div>
+
+    <div id="suggestion-card"></div>
+
+  </div>
+
+  <!-- TAB: PROGRESSION -->
+  <div class="tab-content" id="tab-progress">
+    <div class="filters" id="filters">
+      <button class="filter-btn" data-range="7">7 jours</button>
+      <button class="filter-btn active" data-range="30">30 jours</button>
+      <button class="filter-btn" data-range="90">90 jours</button>
+      <button class="filter-btn" data-range="all">Tout</button>
+    </div>
+    <div id="progress-content"></div>
+  </div>
+
+  <!-- TAB: ANALYSE -->
+  <div class="tab-content" id="tab-analysis">
+    <div class="card">
+      <h2>Générer une analyse</h2>
+      <div class="form-grid">
+        <div class="form-grid-full">
+          <label>Type d'analyse</label>
+          <select id="analysis-type" onchange="updateAnalysisControls()">
+            <option value="last-days">Derniers jours</option>
+            <option value="week-evolution">Évolution semaine</option>
+            <option value="week-comparison">Comparaison de semaines</option>
+            <option value="custom-range">Période personnalisée</option>
+          </select>
+        </div>
+        <div id="ctrl-last-days" class="form-grid-full">
+          <label>Nombre de jours</label>
+          <select id="days-count">
+            <option value="7">7 jours</option>
+            <option value="14" selected>14 jours</option>
+            <option value="30">30 jours</option>
+            <option value="60">60 jours</option>
+            <option value="90">90 jours</option>
+          </select>
+        </div>
+        <div id="ctrl-week-evolution" class="form-grid-full" style="display:none">
+          <label>Semaine</label>
+          <input type="week" id="week-select">
+        </div>
+        <div id="ctrl-week-comparison" style="display:none">
+          <div>
+            <label>Semaine 1</label>
+            <input type="week" id="week1-select">
+          </div>
+          <div>
+            <label>Semaine 2</label>
+            <input type="week" id="week2-select">
+          </div>
+        </div>
+        <div id="ctrl-custom-range" style="display:none">
+          <div>
+            <label>Du</label>
+            <input type="date" id="date-from">
+          </div>
+          <div>
+            <label>Au</label>
+            <input type="date" id="date-to">
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="runAnalysis()">Analyser</button>
+      </div>
+    </div>
+    <div id="analysis-output"></div>
+  </div>
+
+  <!-- TAB: HISTORIQUE -->
+  <div class="tab-content" id="tab-history">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Données</h3>
+          <p class="card-subtitle" id="data-stats">0 entrées</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">Importer CSV</button>
+        <button class="btn btn-secondary" onclick="exportCSV()">Exporter CSV</button>
+        <button class="btn btn-danger" onclick="clearAll()">Tout effacer</button>
+      </div>
+      <input type="file" id="file-input" accept=".csv" style="display:none">
+    </div>
+    <div class="card">
+      <h3 class="card-title">Toutes les entrées</h3>
+      <div id="all-entries" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <p class="subtitle" style="text-align:center;margin-top:24px;font-size:11px;">
+    Stockage local navigateur · Export CSV régulièrement pour backup
+  </p>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/*** CONFIG ***/
+const STORAGE_KEY = 'safetide_entries_v1';
+const COLORS = {
+  score: '#2c7a7b',
+  energy: '#e97451',
+  sleep: '#7c6df2'
+};
+const KEYWORDS = {
+  sommeil: ['sommeil','dormi','dormir','nuit','repos','sieste','fatigué','fatigue','sleep','slept','rest','tired','nap'],
+  activité: ['marche','sport','activité','activite','exercice','sortie','balade','course','yoga','walk','run','ran','exercise','hike','bike'],
+  social: ['ami','famille','visite','rendez-vous','rdv','discussion','repas','diner','friend','family','meeting','dinner','lunch','call'],
+  bienêtre: ['bien','heureux','content','joie','plaisir','agréable','agreable','positive','positif','calme','happy','glad','good','calm','peaceful'],
+  nature: ['soleil','nature','extérieur','exterieur','jardin','parc','plein air','outside','outdoor','sun','park','garden'],
+  stress: ['stress','anxiété','anxiete','angoissé','angoisse','pression','inquiet','tendu','anxious','worried','overwhelmed','pressure'],
+  travail: ['travail','boulot','réunion','reunion','bureau','meeting','projet','work','job','office','project','task']
+};
+
+/*** STATE ***/
+let entries = [];
+let currentRange = 30;
+let charts = {};
+
+/*** STORAGE ***/
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  } catch (e) { entries = []; }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+
+/*** UI HELPERS ***/
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function fmt(v) { return v == null || isNaN(v) ? '—' : v.toFixed(1); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+function formatDateShort(str) {
+  const d = new Date(str);
+  return d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'});
+}
+function formatDateLong(str) {
+  const d = new Date(str);
+  return d.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'});
+}
+function slotFr(s) {
+  return {Morning: 'Matin', Noon: 'Midi', Evening: 'Soir'}[s] || s;
+}
+function slotIcon(s) {
+  return {Morning: '🌅', Noon: '☀️', Evening: '🌙'}[s] || '';
+}
+function todayISO() { return new Date().toISOString().slice(0,10); }
+function avg(arr) {
+  const clean = arr.filter(v => v != null && !isNaN(v));
+  if (!clean.length) return null;
+  return clean.reduce((a,b) => a+b, 0) / clean.length;
+}
+
+/*** CSV ***/
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let c of lines[i]) {
+      if (c === '"' && inQ) { inQ = false; continue; }
+      if (c === '"') { inQ = true; continue; }
+      if (c === ',' && !inQ) { fields.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    fields.push(cur);
+    if (fields.length < 5) continue;
+    rows.push({
+      date: fields[0],
+      slot: fields[1],
+      score: parseFloat(fields[2]),
+      energy: parseFloat(fields[3]),
+      sleep: parseFloat(fields[4]),
+      notes: fields[5] || ''
+    });
+  }
+  return rows;
+}
+function exportCSV() {
+  if (entries.length === 0) { toast('Rien à exporter'); return; }
+  const sorted = [...entries].sort((a,b) => (a.date+a.slot).localeCompare(b.date+b.slot));
+  const header = 'Date,Time Slot,Overall Score,Energy,Sleep,Journal Notes\n';
+  const rows = sorted.map(e => {
+    const notes = e.notes ? `"${String(e.notes).replace(/"/g,'""')}"` : '';
+    return `${e.date},${e.slot},${e.score},${e.energy},${e.sleep},${notes}`;
+  }).join('\n');
+  const blob = new Blob([header + rows], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `safetide-export-${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Export téléchargé');
+}
+function importCSV(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    const newOnes = parseCSV(e.target.result);
+    if (newOnes.length === 0) { toast('CSV vide ou invalide'); return; }
+    const existingKeys = new Set(entries.map(x => x.date+'|'+x.slot));
+    let added = 0;
+    newOnes.forEach(n => {
+      const k = n.date+'|'+n.slot;
+      if (!existingKeys.has(k)) { entries.push(n); added++; }
+    });
+    save();
+    renderAll();
+    toast(`${added} entrée(s) importée(s)`);
+  };
+  r.readAsText(file);
+}
+function clearAll() {
+  if (!confirm('Effacer toutes les entrées ? Pense à exporter avant.')) return;
+  entries = [];
+  save();
+  renderAll();
+  toast('Tout effacé');
+}
+function deleteEntry(date, slot) {
+  entries = entries.filter(e => !(e.date === date && e.slot === slot));
+  save();
+  renderAll();
+}
+
+/*** ENTRY FORM ***/
+function addEntry() {
+  const date = document.getElementById('f-date').value;
+  if (!date) { toast('Choisis une date'); return; }
+  const slot = document.getElementById('f-slot').value;
+  const energy = parseFloat(document.getElementById('f-energy').value);
+  const sleep = parseFloat(document.getElementById('f-sleep').value);
+  const score = (energy + sleep) / 2;
+  const notes = document.getElementById('f-notes').value.trim();
+  entries = entries.filter(e => !(e.date === date && e.slot === slot));
+  entries.push({date, slot, score, energy, sleep, notes});
+  save();
+  renderAll();
+  showSuggestion({date, slot, score, energy, sleep, notes});
+  document.getElementById('f-notes').value = '';
+  toast('Enregistré');
+}
+function resetForm() {
+  ['energy','sleep'].forEach(k => {
+    document.getElementById('f-'+k).value = 6;
+    document.getElementById('v-'+k).textContent = '6.0';
+  });
+  document.getElementById('v-score').textContent = '6.0';
+  document.getElementById('f-notes').value = '';
+}
+function updateComputedScore() {
+  const energy = parseFloat(document.getElementById('f-energy').value);
+  const sleep = parseFloat(document.getElementById('f-sleep').value);
+  const score = (energy + sleep) / 2;
+  document.getElementById('v-score').textContent = score.toFixed(1);
+}
+
+/*** AGGREGATION ***/
+function aggregateByDay(items) {
+  const byDay = {};
+  items.forEach(e => {
+    if (!byDay[e.date]) byDay[e.date] = {score: [], energy: [], sleep: []};
+    if (!isNaN(e.score)) byDay[e.date].score.push(e.score);
+    if (!isNaN(e.energy)) byDay[e.date].energy.push(e.energy);
+    if (!isNaN(e.sleep)) byDay[e.date].sleep.push(e.sleep);
+  });
+  const days = Object.keys(byDay).sort();
+  return days.map(d => ({
+    date: d,
+    score: avg(byDay[d].score),
+    energy: avg(byDay[d].energy),
+    sleep: avg(byDay[d].sleep)
+  }));
+}
+function filterByRange(items) {
+  if (currentRange === 'all') return items;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - currentRange);
+  const cutoffStr = cutoff.toISOString().slice(0,10);
+  return items.filter(e => e.date >= cutoffStr);
+}
+function trendArrow(items, key) {
+  const clean = items.map(i => i[key]).filter(v => v != null);
+  if (clean.length < 4) return {symbol: '→', cls: 'trend-flat', diff: 0};
+  const half = Math.floor(clean.length / 2);
+  const first = avg(clean.slice(0, half));
+  const last = avg(clean.slice(half));
+  const diff = last - first;
+  if (Math.abs(diff) < 0.15) return {symbol: '→', cls: 'trend-flat', diff};
+  if (diff > 0) return {symbol: '↑', cls: 'trend-up', diff};
+  return {symbol: '↓', cls: 'trend-down', diff};
+}
+
+/*** SUGGESTION ENGINE ***/
+function showSuggestion(entry) {
+  const card = document.getElementById('suggestion-card');
+  const msg = generateSuggestion(entry);
+  card.innerHTML = `<div class="suggestion"><h3>💡 Pour toi maintenant</h3><p>${msg}</p></div>`;
+}
+function generateSuggestion(entry) {
+  const hour = new Date().getHours();
+  const recent = entries.slice(-14);
+  const byDay = aggregateByDay(recent);
+  const tScore = trendArrow(byDay, 'score');
+  const tEnergy = trendArrow(byDay, 'energy');
+  const tSleep = trendArrow(byDay, 'sleep');
+  const overall = (entry.score + entry.energy + entry.sleep) / 3;
+  const lowSleep = entry.sleep < 5;
+  const lowEnergy = entry.energy < 5;
+  const lowScore = entry.score < 5;
+
+  // Positive cases first
+  if (overall >= 7.5) {
+    if (tScore.cls === 'trend-up') {
+      return `Forme excellente (${overall.toFixed(1)}/10) et ta tendance monte. Profite-en sans chercher à rattraper le retard — c'est comme ça que ça dure.`;
+    }
+    return `Très bonne énergie aujourd'hui (${overall.toFixed(1)}/10). Note mentalement ce qui a contribué à cette journée — c'est précieux à connaître.`;
+  }
+  if (overall >= 6) {
+    if (tScore.cls === 'trend-up') {
+      return `Tu progresses (+${tScore.diff.toFixed(1)} sur la période). Continue à respecter tes limites, ça porte ses fruits.`;
+    }
+    if (lowSleep && !lowEnergy) {
+      return `Energy correcte malgré un sommeil moyen (${entry.sleep}/10). Vigilance ce soir — essaie de te coucher un peu plus tôt.`;
+    }
+    return `Journée modérée. Pas besoin de forcer — maintien du rythme, c'est déjà une victoire.`;
+  }
+  if (overall >= 4) {
+    if (hour < 12) {
+      return `Démarrage difficile (${overall.toFixed(1)}/10). Début de journée douce : respiration, pas de gros effort cognitif avant une heure.`;
+    }
+    if (hour < 18) {
+      if (tScore.cls === 'trend-down') {
+        return `Énergie en baisse sur la période. Ton corps te demande du repos — écoute-le. 15 min sans écran peuvent faire remonter ton niveau.`;
+      }
+      return `Milieu de journée en mode économique. Honore ce besoin de ralentir. Les micro-pauses valent mieux qu'un gros effort suivi d'un crash.`;
+    }
+    return `Soirée basse. Prépare bien ton sommeil — c'est ton meilleur levier pour demain.`;
+  }
+  // Low energy
+  if (hour < 12) {
+    return `Matinée très basse (${overall.toFixed(1)}/10). Mode survie : zéro décision importante aujourd'hui si possible. Hydratation, lumière, repos.`;
+  }
+  if (lowSleep) {
+    return `Journée dure et sommeil bas (${entry.sleep}/10). La priorité est claire : récupérer cette nuit. Écrans coupés tôt, environnement calme.`;
+  }
+  return `Journée difficile. C'est OK. Rien ne doit être productif aujourd'hui. Ton corps récupère, c'est ce qui compte.`;
+}
+
+/*** CHARTS ***/
+function makeChart(canvasId, data, datasets) {
+  if (charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  charts[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => formatDateShort(d.date)),
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 10, ticks: {stepSize: 2}, grid: {color: '#eef2f6'} },
+        x: { grid: {display: false}, ticks: {maxTicksLimit: 8, font: {size: 11}} }
+      },
+      elements: {
+        line: { tension: 0.3, borderWidth: 2 },
+        point: { radius: 2, hoverRadius: 5 }
+      }
+    }
+  });
+}
+
+/*** RENDER: TODAY ***/
+function renderToday() {
+  const summary = document.getElementById('today-summary');
+  const today = todayISO();
+  const todays = entries.filter(e => e.date === today);
+  const slots = ['Morning','Noon','Evening'];
+  summary.innerHTML = slots.map(slot => {
+    const e = todays.find(x => x.slot === slot);
+    if (!e) {
+      return `<div class="today-entry empty">
+        <div class="slot-name">${slotIcon(slot)} ${slotFr(slot)}</div>
+        <div style="font-size:12px">pas encore</div>
+      </div>`;
+    }
+    return `<div class="today-entry">
+      <div class="slot-name">${slotIcon(slot)} ${slotFr(slot)}</div>
+      <div class="scores">
+        <span class="s-score">${fmt(e.score)}</span>
+        <span class="s-energy">${fmt(e.energy)}</span>
+        <span class="s-sleep">${fmt(e.sleep)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  // Reminder banner
+  const banner = document.getElementById('reminder-banner');
+  banner.style.display = todays.length === 0 ? 'flex' : 'none';
+}
+
+/*** RENDER: PROGRESS ***/
+function renderProgress() {
+  const content = document.getElementById('progress-content');
+  if (entries.length === 0) {
+    content.innerHTML = `<div class="card"><div class="empty-state"><h3>Pas encore de données</h3><p>Importe ton CSV ou ajoute une entrée dans l'onglet Aujourd'hui.</p></div></div>`;
+    return;
+  }
+  const filtered = filterByRange(entries);
+  const byDay = aggregateByDay(filtered);
+  if (byDay.length === 0) {
+    content.innerHTML = `<div class="card"><div class="empty-state"><h3>Aucune donnée sur cette période</h3></div></div>`;
+    return;
+  }
+  const latest = byDay[byDay.length - 1];
+  const avgScore = avg(byDay.map(d => d.score));
+  const avgEnergy = avg(byDay.map(d => d.energy));
+  const avgSleep = avg(byDay.map(d => d.sleep));
+  const tScore = trendArrow(byDay, 'score');
+  const tEnergy = trendArrow(byDay, 'energy');
+  const tSleep = trendArrow(byDay, 'sleep');
+
+  content.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Vue d'ensemble</h3>
+          <p class="card-subtitle">Les 3 métriques combinées</p>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span style="background:${COLORS.score};width:10px;height:10px;border-radius:50%;display:inline-block"></span>Overall</div>
+        <div class="legend-item"><span style="background:${COLORS.energy};width:10px;height:10px;border-radius:50%;display:inline-block"></span>Energy</div>
+        <div class="legend-item"><span style="background:${COLORS.sleep};width:10px;height:10px;border-radius:50%;display:inline-block"></span>Sleep</div>
+      </div>
+      <canvas id="chart-overview"></canvas>
+    </div>
+    ${renderMetricCard('Overall Score', COLORS.score, latest.score, avgScore, tScore, 'chart-score')}
+    ${renderMetricCard('Energy', COLORS.energy, latest.energy, avgEnergy, tEnergy, 'chart-energy')}
+    ${renderMetricCard('Sleep', COLORS.sleep, latest.sleep, avgSleep, tSleep, 'chart-sleep')}
+    ${renderJournalSection(filtered)}
+  `;
+
+  makeChart('chart-overview', byDay, [
+    {label: 'Overall', data: byDay.map(d => d.score), borderColor: COLORS.score, backgroundColor: COLORS.score+'20'},
+    {label: 'Energy', data: byDay.map(d => d.energy), borderColor: COLORS.energy, backgroundColor: COLORS.energy+'20'},
+    {label: 'Sleep', data: byDay.map(d => d.sleep), borderColor: COLORS.sleep, backgroundColor: COLORS.sleep+'20'}
+  ]);
+  makeChart('chart-score', byDay, [{label: 'Overall', data: byDay.map(d => d.score), borderColor: COLORS.score, backgroundColor: COLORS.score+'20', fill: true}]);
+  makeChart('chart-energy', byDay, [{label: 'Energy', data: byDay.map(d => d.energy), borderColor: COLORS.energy, backgroundColor: COLORS.energy+'20', fill: true}]);
+  makeChart('chart-sleep', byDay, [{label: 'Sleep', data: byDay.map(d => d.sleep), borderColor: COLORS.sleep, backgroundColor: COLORS.sleep+'20', fill: true}]);
+}
+function renderMetricCard(name, color, latest, average, trend, chartId) {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title"><span class="dot" style="background:${color}"></span>${name}</h3>
+        </div>
+        <div class="stats">
+          <div><div class="stat-label">Dernier</div><div class="stat-value" style="color:${color}">${fmt(latest)}</div></div>
+          <div><div class="stat-label">Moyenne</div><div class="stat-value">${fmt(average)}</div></div>
+          <div><div class="stat-label">Tendance</div><div class="stat-value ${trend.cls}">${trend.symbol}</div></div>
+        </div>
+      </div>
+      <canvas id="${chartId}"></canvas>
+    </div>`;
+}
+function renderJournalSection(items) {
+  const withNotes = items.filter(e => e.notes && e.notes.trim()).sort((a,b) => (b.date+b.slot).localeCompare(a.date+a.slot));
+  if (withNotes.length === 0) return '';
+  return `<div class="card">
+    <div class="card-header">
+      <div>
+        <h3 class="card-title">Journal</h3>
+        <p class="card-subtitle">${withNotes.length} note(s) sur la période</p>
+      </div>
+    </div>
+    <div class="journal">
+      ${withNotes.map(e => `
+        <div class="journal-entry">
+          <div class="journal-date">${formatDateShort(e.date)} · ${slotFr(e.slot)}</div>
+          ${escapeHtml(e.notes)}
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/*** RENDER: HISTORY ***/
+function renderHistory() {
+  document.getElementById('data-stats').textContent = `${entries.length} entrée(s) au total`;
+  const container = document.getElementById('all-entries');
+  if (entries.length === 0) {
+    container.innerHTML = '<p class="subtitle" style="text-align:center">Aucune entrée.</p>';
+    return;
+  }
+  const sorted = [...entries].sort((a,b) => (b.date+b.slot).localeCompare(a.date+a.slot));
+  container.innerHTML = sorted.slice(0, 200).map(e => `
+    <div class="entry-row">
+      <div class="entry-meta">${formatDateShort(e.date)}</div>
+      <div class="entry-meta">${slotIcon(e.slot)} ${slotFr(e.slot)}</div>
+      <div class="entry-scores">
+        <span style="background:${COLORS.score}20;color:${COLORS.score}">${fmt(e.score)}</span>
+        <span style="background:${COLORS.energy}20;color:${COLORS.energy}">${fmt(e.energy)}</span>
+        <span style="background:${COLORS.sleep}20;color:${COLORS.sleep}">${fmt(e.sleep)}</span>
+      </div>
+      <button class="entry-delete" onclick="deleteEntry('${e.date}','${e.slot}')" title="Supprimer">✕</button>
+    </div>
+  `).join('') + (sorted.length > 200 ? `<p class="subtitle" style="text-align:center;margin-top:8px">+ ${sorted.length - 200} plus anciennes (exporte pour tout voir)</p>` : '');
+}
+
+/*** ANALYSIS ENGINE ***/
+function updateAnalysisControls() {
+  const type = document.getElementById('analysis-type').value;
+  ['ctrl-last-days','ctrl-week-evolution','ctrl-week-comparison','ctrl-custom-range'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('ctrl-'+type).style.display = type === 'week-comparison' || type === 'custom-range' ? 'grid' : 'block';
+  // set defaults
+  const today = new Date();
+  if (type === 'week-evolution') {
+    document.getElementById('week-select').value = getWeekInputString(today);
+  } else if (type === 'week-comparison') {
+    const lastWeek = new Date(today.getTime() - 7*24*3600*1000);
+    document.getElementById('week1-select').value = getWeekInputString(lastWeek);
+    document.getElementById('week2-select').value = getWeekInputString(today);
+  } else if (type === 'custom-range') {
+    const twoWeeksAgo = new Date(today.getTime() - 14*24*3600*1000);
+    document.getElementById('date-from').value = twoWeeksAgo.toISOString().slice(0,10);
+    document.getElementById('date-to').value = todayISO();
+  }
+}
+function getWeekInputString(date) {
+  const y = date.getFullYear();
+  const firstJan = new Date(y, 0, 1);
+  const dayOfYear = Math.floor((date - firstJan) / (24*3600*1000)) + 1;
+  const weekNum = Math.ceil((dayOfYear + firstJan.getDay()) / 7);
+  return `${y}-W${String(weekNum).padStart(2,'0')}`;
+}
+function getWeekRange(weekStr) {
+  const [y, w] = weekStr.split('-W');
+  const firstJan = new Date(parseInt(y), 0, 1);
+  const daysOffset = (parseInt(w) - 1) * 7 - firstJan.getDay() + 1;
+  const monday = new Date(firstJan.getTime() + daysOffset * 24*3600*1000);
+  const sunday = new Date(monday.getTime() + 6 * 24*3600*1000);
+  return {
+    start: monday.toISOString().slice(0,10),
+    end: sunday.toISOString().slice(0,10)
+  };
+}
+function runAnalysis() {
+  const type = document.getElementById('analysis-type').value;
+  const output = document.getElementById('analysis-output');
+  if (entries.length === 0) {
+    output.innerHTML = '<div class="card"><div class="empty-state"><p>Aucune donnée à analyser.</p></div></div>';
+    return;
+  }
+  let html = '';
+  if (type === 'last-days') {
+    const days = parseInt(document.getElementById('days-count').value);
+    html = analyzeLastDays(days);
+  } else if (type === 'week-evolution') {
+    const range = getWeekRange(document.getElementById('week-select').value);
+    html = analyzeWeekEvolution(range);
+  } else if (type === 'week-comparison') {
+    const r1 = getWeekRange(document.getElementById('week1-select').value);
+    const r2 = getWeekRange(document.getElementById('week2-select').value);
+    html = compareWeeks(r1, r2);
+  } else if (type === 'custom-range') {
+    const from = document.getElementById('date-from').value;
+    const to = document.getElementById('date-to').value;
+    html = analyzeRange(from, to, 'Période personnalisée');
+  }
+  output.innerHTML = html;
+}
+function analyzeLastDays(days) {
+  const to = todayISO();
+  const fromD = new Date(); fromD.setDate(fromD.getDate() - (days-1));
+  const from = fromD.toISOString().slice(0,10);
+  return analyzeRange(from, to, `Derniers ${days} jours`);
+}
+function analyzeRange(from, to, title) {
+  const relevant = entries.filter(e => e.date >= from && e.date <= to);
+  if (relevant.length === 0) {
+    return '<div class="card"><div class="empty-state"><p>Aucune donnée sur cette période.</p></div></div>';
+  }
+  const byDay = aggregateByDay(relevant);
+  const avgScore = avg(byDay.map(d => d.score));
+  const avgEnergy = avg(byDay.map(d => d.energy));
+  const avgSleep = avg(byDay.map(d => d.sleep));
+  const overall = (avgScore + avgEnergy + avgSleep) / 3;
+  const tScore = trendArrow(byDay, 'score');
+  const tEnergy = trendArrow(byDay, 'energy');
+  const tSleep = trendArrow(byDay, 'sleep');
+  // time of day breakdown
+  const morningEntries = relevant.filter(e => e.slot === 'Morning');
+  const noonEntries = relevant.filter(e => e.slot === 'Noon');
+  const eveningEntries = relevant.filter(e => e.slot === 'Evening');
+  const avgMorning = avg(morningEntries.map(e => (e.score+e.energy+e.sleep)/3));
+  const avgNoon = avg(noonEntries.map(e => (e.score+e.energy+e.sleep)/3));
+  const avgEvening = avg(eveningEntries.map(e => (e.score+e.energy+e.sleep)/3));
+  const notesAnalysis = analyzeNotes(relevant);
+
+  let html = `<div class="card analysis-result">`;
+  html += `<h2>📊 ${escapeHtml(title)}</h2>`;
+  html += `<p class="subtitle">${formatDateLong(from)} → ${formatDateLong(to)} · ${relevant.length} entrées · ${byDay.length} jour(s)</p>`;
+
+  html += `<div class="insight"><strong>Vue d'ensemble</strong>`;
+  html += `<p>Moyenne globale : <span class="highlight">${overall.toFixed(1)}/10</span></p>`;
+  html += `<p>Score ${fmt(avgScore)} · Energy ${fmt(avgEnergy)} · Sleep ${fmt(avgSleep)}</p>`;
+  if (overall >= 7) html += `<p>Niveau élevé et constant. Tu tiens quelque chose de solide.</p>`;
+  else if (overall >= 5.5) html += `<p>Niveau correct. Pas de crash, pas d'envol — terrain stable.</p>`;
+  else if (overall >= 4) html += `<p>Niveau bas mais pas critique. Ton corps est en mode récupération.</p>`;
+  else html += `<p>Période difficile. Pas de jugement — les données sont juste là pour être honnêtes.</p>`;
+  html += `</div>`;
+
+  html += `<div class="insight"><strong>Tendances</strong>`;
+  html += `<p>Overall ${trendText(tScore, 'score')} · Energy ${trendText(tEnergy, 'energy')} · Sleep ${trendText(tSleep, 'sleep')}</p>`;
+  html += `</div>`;
+
+  html += `<div class="insight"><strong>Rythme journalier</strong>`;
+  html += `<p>Matin : ${fmt(avgMorning)} · Midi : ${fmt(avgNoon)} · Soir : ${fmt(avgEvening)}</p>`;
+  if (avgMorning != null && avgEvening != null) {
+    const diff = avgEvening - avgMorning;
+    if (diff > 1) html += `<p>Tu remontes en fin de journée (+${diff.toFixed(1)}). Profil "du soir".</p>`;
+    else if (diff < -1) html += `<p>Tu démarres bien et tu baisses en soirée (${diff.toFixed(1)}). Préserve tes matinées.</p>`;
+    else html += `<p>Rythme plutôt stable sur la journée.</p>`;
+  }
+  html += `</div>`;
+
+  if (notesAnalysis) html += `<div class="insight"><strong>Thèmes dans tes notes</strong>${notesAnalysis}</div>`;
+
+  html += `</div>`;
+  return html;
+}
+function trendText(trend, key) {
+  if (trend.cls === 'trend-up') return `<span class="trend-up">↑ +${trend.diff.toFixed(1)}</span>`;
+  if (trend.cls === 'trend-down') return `<span class="trend-down">↓ ${trend.diff.toFixed(1)}</span>`;
+  return `<span class="trend-flat">→ stable</span>`;
+}
+function analyzeWeekEvolution(range) {
+  const relevant = entries.filter(e => e.date >= range.start && e.date <= range.end);
+  if (relevant.length === 0) return '<div class="card"><div class="empty-state"><p>Aucune donnée pour cette semaine.</p></div></div>';
+  const byDay = aggregateByDay(relevant);
+  let html = `<div class="card analysis-result">`;
+  html += `<h2>📅 Évolution semaine</h2>`;
+  html += `<p class="subtitle">${formatDateLong(range.start)} → ${formatDateLong(range.end)} · ${byDay.length} jour(s)</p>`;
+  html += `<div class="insight"><strong>Jour par jour</strong>`;
+  byDay.forEach((d, i) => {
+    const dayName = new Date(d.date).toLocaleDateString('fr-FR', {weekday: 'long'});
+    const daily = (d.score + d.energy + d.sleep) / 3;
+    let diffStr = '';
+    if (i > 0) {
+      const prev = (byDay[i-1].score + byDay[i-1].energy + byDay[i-1].sleep) / 3;
+      const diff = daily - prev;
+      if (diff > 0.5) diffStr = ` <span class="trend-up">(+${diff.toFixed(1)})</span>`;
+      else if (diff < -0.5) diffStr = ` <span class="trend-down">(${diff.toFixed(1)})</span>`;
+    }
+    html += `<p><strong>${dayName}</strong> (${formatDateShort(d.date)}) — ${daily.toFixed(1)}/10${diffStr}`;
+    html += ` · Score ${fmt(d.score)} · Energy ${fmt(d.energy)} · Sleep ${fmt(d.sleep)}`;
+    const dayNotes = relevant.filter(e => e.date === d.date && e.notes && e.notes.trim()).map(e => e.notes);
+    if (dayNotes.length > 0) {
+      html += `<br><em style="color:var(--text-dim);font-size:13px">"${escapeHtml(dayNotes.join(' · '))}"</em>`;
+    }
+    html += `</p>`;
+  });
+  html += `</div>`;
+  const notesAnalysis = analyzeNotes(relevant);
+  if (notesAnalysis) html += `<div class="insight"><strong>Thèmes récurrents</strong>${notesAnalysis}</div>`;
+  html += `</div>`;
+  return html;
+}
+function compareWeeks(r1, r2) {
+  const e1 = entries.filter(e => e.date >= r1.start && e.date <= r1.end);
+  const e2 = entries.filter(e => e.date >= r2.start && e.date <= r2.end);
+  if (e1.length === 0 || e2.length === 0) return '<div class="card"><div class="empty-state"><p>Données insuffisantes pour comparer.</p></div></div>';
+  const byDay1 = aggregateByDay(e1);
+  const byDay2 = aggregateByDay(e2);
+  const a1 = {score: avg(byDay1.map(d=>d.score)), energy: avg(byDay1.map(d=>d.energy)), sleep: avg(byDay1.map(d=>d.sleep))};
+  const a2 = {score: avg(byDay2.map(d=>d.score)), energy: avg(byDay2.map(d=>d.energy)), sleep: avg(byDay2.map(d=>d.sleep))};
+  const overall1 = (a1.score + a1.energy + a1.sleep) / 3;
+  const overall2 = (a2.score + a2.energy + a2.sleep) / 3;
+  const diff = overall2 - overall1;
+
+  let html = `<div class="card analysis-result">`;
+  html += `<h2>⚖️ Comparaison</h2>`;
+  html += `<div class="insight"><strong>Semaine 1</strong>`;
+  html += `<p class="subtitle">${formatDateLong(r1.start)} → ${formatDateLong(r1.end)}</p>`;
+  html += `<p>Moyenne ${overall1.toFixed(1)} · Score ${fmt(a1.score)} · Energy ${fmt(a1.energy)} · Sleep ${fmt(a1.sleep)}</p>`;
+  html += `</div>`;
+  html += `<div class="insight"><strong>Semaine 2</strong>`;
+  html += `<p class="subtitle">${formatDateLong(r2.start)} → ${formatDateLong(r2.end)}</p>`;
+  html += `<p>Moyenne ${overall2.toFixed(1)} · Score ${fmt(a2.score)} · Energy ${fmt(a2.energy)} · Sleep ${fmt(a2.sleep)}</p>`;
+  html += `</div>`;
+  html += `<div class="insight"><strong>Évolution</strong><p>`;
+  if (diff > 1) html += `<span class="trend-up">↑ +${diff.toFixed(1)}</span> — progression nette.`;
+  else if (diff > 0.3) html += `<span class="trend-up">↑ +${diff.toFixed(1)}</span> — progression légère.`;
+  else if (diff > -0.3) html += `<span class="trend-flat">→ ${diff.toFixed(1)}</span> — stabilité.`;
+  else if (diff > -1) html += `<span class="trend-down">↓ ${diff.toFixed(1)}</span> — légère baisse.`;
+  else html += `<span class="trend-down">↓ ${diff.toFixed(1)}</span> — baisse marquée.`;
+  html += `</p>`;
+  // per-metric diff
+  html += `<p style="margin-top:6px">Score ${formatDiff(a2.score - a1.score)} · Energy ${formatDiff(a2.energy - a1.energy)} · Sleep ${formatDiff(a2.sleep - a1.sleep)}</p>`;
+  html += `</div>`;
+  html += `</div>`;
+  return html;
+}
+function formatDiff(d) {
+  if (d > 0.3) return `<span class="trend-up">+${d.toFixed(1)}</span>`;
+  if (d < -0.3) return `<span class="trend-down">${d.toFixed(1)}</span>`;
+  return `<span class="trend-flat">~0</span>`;
+}
+function analyzeNotes(relevantEntries) {
+  const withNotes = relevantEntries.filter(e => e.notes && e.notes.trim());
+  if (withNotes.length === 0) return null;
+  const mentions = {};
+  Object.keys(KEYWORDS).forEach(cat => {
+    mentions[cat] = 0;
+    withNotes.forEach(e => {
+      const text = e.notes.toLowerCase();
+      if (KEYWORDS[cat].some(w => text.includes(w))) mentions[cat]++;
+    });
+  });
+  const meaningful = Object.entries(mentions).filter(([_,count]) => count >= 2);
+  if (meaningful.length === 0) {
+    return `<p>${withNotes.length} note(s) enregistrée(s). Continue à noter ce qui te structure la journée.</p>`;
+  }
+  let html = '<ul>';
+  meaningful.sort((a,b) => b[1]-a[1]).forEach(([cat, count]) => {
+    const pct = ((count / withNotes.length) * 100).toFixed(0);
+    const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+    html += `<li><strong>${label}</strong> — ${count} mention(s) (${pct}% de tes notes)</li>`;
+  });
+  html += '</ul>';
+  return html;
+}
+
+/*** ROUTING ***/
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-'+tabName));
+  if (tabName === 'progress') renderProgress();
+  else if (tabName === 'history') renderHistory();
+  else if (tabName === 'today') renderToday();
+  else if (tabName === 'analysis') { /* lazy */ }
+}
+
+function renderAll() {
+  renderToday();
+  renderProgress();
+  renderHistory();
+}
+
+/*** INIT ***/
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  document.getElementById('f-date').value = todayISO();
+
+  // Slider live values
+  ['energy','sleep'].forEach(k => {
+    const input = document.getElementById('f-'+k);
+    const valEl = document.getElementById('v-'+k);
+    const update = () => {
+      valEl.textContent = parseFloat(input.value).toFixed(1);
+      updateComputedScore();
+    };
+    input.addEventListener('input', update);
+    update();
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(b => {
+    b.addEventListener('click', () => switchTab(b.dataset.tab));
+  });
+
+  // Time filters
+  document.getElementById('filters').addEventListener('click', e => {
+    if (!e.target.classList.contains('filter-btn')) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    const r = e.target.dataset.range;
+    currentRange = r === 'all' ? 'all' : parseInt(r);
+    renderProgress();
+  });
+
+  // File import
+  document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files[0]) importCSV(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // Analysis defaults
+  updateAnalysisControls();
+
+  renderAll();
+});
+</script>
+</body>
+</html>

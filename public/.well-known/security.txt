@@ -1,0 +1,4 @@
+Contact: mailto:safetidecontact@gmail.com
+Expires: 2027-04-21T00:00:00Z
+Preferred-Languages: fr, en
+Canonical: https://safetide.app/.well-known/security.txt
